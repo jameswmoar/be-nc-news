@@ -13,4 +13,13 @@ exports.makeRefObj = (list, refKey, refValue) => {
   return dataObj;
 };
 
-exports.formatComments = (comments, articleRef) => {};
+exports.formatComments = (comments, articleRef) => {
+  return comments.map(item => {
+    const { belongs_to, created_by, created_at, ...restofItem } = item;
+    const dataObj = { ...restofItem };
+    dataObj.article_id = articleRef[belongs_to];
+    dataObj.author = created_by;
+    dataObj.created_at = new Date(created_at);
+    return dataObj;
+  });
+};

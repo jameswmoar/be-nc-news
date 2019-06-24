@@ -104,4 +104,114 @@ describe("makeRefObj", () => {
   });
 });
 
-describe("formatComments", () => {});
+describe("formatComments", () => {
+  it("returns an empty array when passed an empty array", () => {
+    expect(formatComments([])).to.eql([]);
+  });
+
+  it("returns an array containing a formatted comment with the correct keys when passed an array containing a single comment", () => {
+    const comments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "butter_bridge",
+        votes: 14,
+        created_at: 1479818163389
+      }
+    ];
+    const articleRef = { "Living in the shadow of a great man": 1 };
+    const formattedComments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        article_id: 1,
+        author: "butter_bridge",
+        votes: 14,
+        created_at: new Date("2016-11-22T12:36:03.389Z")
+      }
+    ];
+    const actual = formatComments(comments, articleRef);
+    expect(actual[0]).to.contain.key("author");
+    expect(actual[0]).to.contain.key("article_id");
+  });
+
+  it("returns an array containing a formatted comment with a javascript data object as created_at when passed an array containing a single comment", () => {
+    const comments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "butter_bridge",
+        votes: 14,
+        created_at: 1479818163389
+      }
+    ];
+    const articleRef = { "Living in the shadow of a great man": 1 };
+    const formattedComments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        article_id: 1,
+        author: "butter_bridge",
+        votes: 14,
+        created_at: new Date("2016-11-22T12:36:03.389Z")
+      }
+    ];
+    const actual = formatComments(comments, articleRef);
+    expect(actual[0].created_at).to.eql(new Date("2016-11-22T12:36:03.389Z"));
+  });
+  
+  it("returns an array that maintains unchanged existing elements when passed an array containing a single comment", () => {
+    const comments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "butter_bridge",
+        votes: 14,
+        created_at: 1479818163389
+      }
+    ];
+    const articleRef = { "Living in the shadow of a great man": 1 };
+    const formattedComments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        article_id: 1,
+        author: "butter_bridge",
+        votes: 14,
+        created_at: new Date("2016-11-22T12:36:03.389Z")
+      }
+    ];
+    const actual = formatComments(comments, articleRef);
+    expect(actual[0].body).to.eql(comments[0].body);
+    expect(actual[0].votes).to.eql(comments[0].votes);
+  });
+  
+  it("returns an array containing a single formatted comment when passed an array containing a single comment", () => {
+    const comments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        belongs_to: "Living in the shadow of a great man",
+        created_by: "butter_bridge",
+        votes: 14,
+        created_at: 1479818163389
+      }
+    ];
+    const articleRef = { "Living in the shadow of a great man": 1 };
+    const formattedComments = [
+      {
+        body:
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+        article_id: 1,
+        author: "butter_bridge",
+        votes: 14,
+        created_at: new Date("2016-11-22T12:36:03.389Z")
+      }
+    ];
+    const actual = formatComments(comments, articleRef);
+    expect(actual).to.eql(formattedComments);
+  });
+});
