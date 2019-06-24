@@ -5,7 +5,7 @@ exports.up = (connection, Promise) => {
     commentsTable.integer("article_id").references("articles.article_id");
     commentsTable.integer("votes").defaultTo(0);
     commentsTable.timestamp("created_at").defaultTo(connection.fn.now());
-    commentsTable.string("body").notNullable();
+    commentsTable.text("body").notNullable();
   });
 };
 
