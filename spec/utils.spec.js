@@ -63,6 +63,45 @@ describe("formatDate", () => {
   });
 });
 
-describe("makeRefObj", () => {});
+describe("makeRefObj", () => {
+  it("returns an empty object when passed an empty array", () => {
+    expect(makeRefObj([])).to.eql({});
+  });
+  it("returns a reference object with one key value pair when passed an array containing a single object", () => {
+    const data = [
+      {
+        article_id: 1,
+        title: "A"
+      }
+    ];
+    const refKey = "title";
+    const refValue = "article_id";
+    const actual = makeRefObj(data, refKey, refValue);
+    const expected = {
+      A: 1
+    };
+    expect(actual).to.eql(expected);
+  });
+  it("returns a reference object with multiple key value pairs when passed an array containing multiple objects", () => {
+    const data = [
+      {
+        article_id: 1,
+        title: "A"
+      },
+      {
+        article_id: 2,
+        title: "B"
+      }
+    ];
+    const refKey = "title";
+    const refValue = "article_id";
+    const actual = makeRefObj(data, refKey, refValue);
+    const expected = {
+      A: 1,
+      B: 2
+    };
+    expect(actual).to.eql(expected);
+  });
+});
 
 describe("formatComments", () => {});
