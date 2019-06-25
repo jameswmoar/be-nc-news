@@ -1,9 +1,13 @@
-const express = require('express')
-const app = express()
-const apiRouter = require('./routes/api-router.js')
+const express = require("express");
+const app = express();
+const apiRouter = require("./routes/api-router.js");
 
-app.use(express.json())
+const { handleCustomErrors } = require("./errors/index.js");
 
-app.use('/api', apiRouter)
+app.use(express.json());
 
-module.exports = app
+app.use("/api", apiRouter);
+
+app.use(handleCustomErrors)
+
+module.exports = app;

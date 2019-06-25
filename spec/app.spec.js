@@ -36,6 +36,14 @@ describe("/", () => {
               );
             });
         });
+        it('GET: status 404, when provided a username that does not exist', () => {
+          return request(app)
+          .get('/api/users/rogersock')
+          .expect(404)
+          .then(({body}) => {
+            expect(body.msg).to.equal("User not found")
+          })
+        });
       });
     });
 
@@ -47,10 +55,15 @@ describe("/", () => {
           .expect(200)
           .then(({body}) => {
             expect(body.article).to.contain.keys(
-              'title',
               'author',
-              'article_id'
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes'
             )
+            // expect(body.article).to.contain.keys('comment_count')
           })
         });
       });
