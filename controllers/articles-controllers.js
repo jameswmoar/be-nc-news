@@ -1,4 +1,9 @@
-const { fetchArticle, updateArticle, addComment } = require("../models/articles-models.js");
+const {
+  fetchArticle,
+  updateArticle,
+  addComment,
+  fetchComments
+} = require("../models/articles-models.js");
 
 const sendArticle = (req, res, next) => {
   const { article_id } = req.params;
@@ -18,13 +23,20 @@ const patchArticle = (req, res, next) => {
 };
 
 const postComment = (req, res, next) => {
-  const { article_id } = req.params
-  const {body} = req
-  body.article_id = article_id
-  addComment(req.body)
+  const { article_id } = req.params;
+  const { username, body } = req.body;
+  const newCommentBody = { body };
+  newCommentBody.author = username;
+  newCommentBody.article_id = article_id;
+  addComment(newCommentBody)
   .then(newComment => {
-    res.status(201).send({newComment})
-  })
-}
+    res.status(201).send({ newComment });
+  });
+};
 
-module.exports = { sendArticle, patchArticle, postComment };
+const sendComments = (req, res, next) => {
+  const { sort_by, order } = req.query;
+  fetchComments(req.params).then(comments => res.status(200).send(comments));
+};
+
+module.exports = { sendArticle, patchArticle, sendComments, postComment };

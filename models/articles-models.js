@@ -22,7 +22,7 @@ const updateArticle = (inc_votes, article_id) => {
   return connection
     .first("*")
     .from("articles")
-    .where("articles.article_id", "=", article_id)
+    .where("article_id", "=", article_id)
     .increment("votes", inc_votes)
     .returning("*")
     .then(([article]) => article);
@@ -36,4 +36,13 @@ const addComment = comment => {
     .then(([newComment]) => newComment);
 };
 
-module.exports = { fetchArticle, updateArticle, addComment };
+const fetchComments = ({article_id}) => {
+  // needs: article_id, queries (sort_by, order)
+  return connection
+    .select("*")
+    .from("comments")
+    .where("article_id", "=", article_id)
+    .orderBy('created_at', 'desc')    
+};
+
+module.exports = { fetchArticle, updateArticle, addComment, fetchComments };

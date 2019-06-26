@@ -4,6 +4,9 @@ const app = require("../app.js");
 const chai = require("chai");
 const { expect } = chai;
 const connection = require("../db/connection.js");
+const chaiSorted = require("chai-sorted");
+
+chai.use(chaiSorted);
 
 describe("/", () => {
   after(() => connection.destroy());
@@ -93,40 +96,62 @@ describe("/", () => {
         });
         it("PATCH: status 200, increments the selected article's vote by the stated number", () => {
           return request(app)
-          .patch('/api/articles/1')
-          .send({ inc_votes: 1})
-          .expect(200)
-          .then(({body}) => {
-            expect(body.updatedArticle.votes).to.equal(101)
-          })
+            .patch("/api/articles/1")
+            .send({ inc_votes: 1 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedArticle.votes).to.equal(101);
+            });
         });
         it("PATCH: status 200, decrements the selected article's vote by the stated number", () => {
           return request(app)
-          .patch('/api/articles/1')
-          .send({ inc_votes: -40})
-          .expect(200)
-          .then(({body}) => {
-            expect(body.updatedArticle.votes).to.equal(60)
-          })
+            .patch("/api/articles/1")
+            .send({ inc_votes: -40 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedArticle.votes).to.equal(60);
+            });
         });
-      });
-      describe('/comments', () => {
-        it('POST: status 201, posts a comment to the selected article and displays that comment', () => {
-          return request(app)
-          .post('/api/articles/1/comments')
-          .send({
-            body: 'I have a controvertial opinion regarding the content of this article',
-            author: 'butter_bridge'
-          })
-          .expect(201)
-          .then(({body}) => {
-            expect(body.newComment).to.contain.keys('body', 'votes', 'comment_id', 'author', 'created_at', 'article_id')
-            expect(body.newComment.article_id).to.equal(1)
-          })
+
+        describe("/comments", () => {
+          it("POST: status 201, posts a comment to the selected article and displays that comment", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                body:
+                  "I have a controvertial opinion regarding the subject matter of this article",
+                username: "butter_bridge"
+              })
+              .expect(201)
+              .then(({ body }) => {
+                expect(body.newComment).to.contain.keys(
+                  "body",
+                  "votes",
+                  "comment_id",
+                  "author",
+                  "created_at",
+                  "article_id"
+                );
+                expect(body.newComment.article_id).to.equal(1);
+              });
+          });
+          it("GET: status 200, displays all comments for specified article, sorting comments by created_at and in descending order by default", () => {
+            return request(app)
+              .get("/api/articles/1/comments")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body[0]).to.contain.keys(
+                  "comment_id",
+                  "votes",
+                  "created_at",
+                  "author",
+                  "body"
+                );
+                expect(body).to.be.descendingBy("created_at");
+              });
+          });
         });
       });
     });
-
-    describe("/comments", () => {});
   });
 });
