@@ -34,6 +34,7 @@ describe("/", () => {
           });
       });
     });
+
     describe("/users", () => {
       describe("/:username", () => {
         it("GET: status 200, displays the correct username", () => {
@@ -91,7 +92,7 @@ describe("/", () => {
             .get("/api/articles/not-a-number")
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).to.equal("Bad request");
+              expect(body.msg).to.equal("Bad request - invalid value");
             });
         });
         it("PATCH: status 200, increments the selected article's vote by the stated number", () => {
@@ -111,6 +112,32 @@ describe("/", () => {
             .then(({ body }) => {
               expect(body.updatedArticle.votes).to.equal(60);
             });
+        });
+        it('PATCH: status 400, returns an error where no inc_votes value is provided', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Bad request - no increment/decrement value provided')
+            })
+        });
+        it('PATCH: status 400, returns an error where an invalid inc_votes value is provided', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 'hello' })
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Bad request - invalid value')
+            })
+        });
+        it.only('PATCH: status 200, ignores any additional element passed in through the body', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: -40, pet: 'cat' })
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Bad request - too many parameters')
+            })
         });
 
         describe("/comments", () => {

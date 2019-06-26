@@ -17,6 +17,12 @@ const sendArticle = (req, res, next) => {
 const patchArticle = (req, res, next) => {
   const { inc_votes } = req.body;
   const { article_id } = req.params;
+  if (!inc_votes) {
+    return Promise.reject({
+      'status': 400,
+      'msg': 'Bad request - no increment/decrement value provided'
+    }).catch(next)
+  }
   updateArticle(inc_votes, article_id)
     .then(updatedArticle => {
       res.status(200).send({ updatedArticle });
