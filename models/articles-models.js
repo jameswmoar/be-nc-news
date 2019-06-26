@@ -23,10 +23,9 @@ const updateArticle = (inc_votes, article_id) => {
     .first("*")
     .from("articles")
     .where("articles.article_id", "=", article_id)
-    .then(article => {
-      article.votes += inc_votes;
-      return article;
-    });
+    .increment("votes", inc_votes)
+    .returning("*")
+    .then(([article]) => article);
 };
 
 const addComment = comment => {
