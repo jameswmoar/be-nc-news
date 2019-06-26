@@ -160,6 +160,35 @@ describe("/", () => {
             expect(body.articles).to.be.descendingBy('topic')
           })
       });
+      it('GET: status 200, displays all articles, filtered by a selected author and topic', () => {
+        return request(app)
+          .get('/api/articles?author=rogersop&topic=mitch')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.descendingBy('topic')
+          })
+      });
+      it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
+        return request(app)
+          .get("/api/articles?sort_by=not-a-column")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - invalid sort by value"
+            );
+          });
+      });
+      it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
+        return request(app)
+          .get("/api/articles?order=invalid-order")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - invalid order value"
+            );
+          });
+      });
+
       it("INVALID METHOD: status 405", () => {
         const invalidMethods = ["patch", "put", "post", "delete"];
         const methodPromises = invalidMethods.map(method => {

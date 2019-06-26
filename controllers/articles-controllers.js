@@ -74,10 +74,20 @@ const sendComments = (req, res, next) => {
 };
 
 const sendArticles = (req, res, next) => {
-  fetchArticles(req)
-  .then(articles => {
-    res.status(200).send({articles})
-  });
+  const { sort_by, order, author, topic } = req.query;
+  const validOrder = ["asc", "desc"].includes(order);
+  if (order && !validOrder) {
+    next({
+      status: 400,
+      msg: "Bad request - invalid order value"
+    });
+  } else {
+    fetchArticles(sort_by, order, author, topic)
+      .then(articles => {
+        res.status(200).send({ articles });
+      })
+      .catch(next);
+  }
 };
 
 module.exports = {

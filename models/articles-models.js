@@ -48,8 +48,7 @@ const fetchComments = (article_id, sort_by, order) => {
       } else return comments;
     });
 };
-const fetchArticles = ({ query }) => {
-  const { sort_by, order, author, topic } = query;
+const fetchArticles = (sort_by, order, author, topic) => {
   return connection
     .select("articles.*")
     .from("articles")
@@ -60,10 +59,10 @@ const fetchArticles = ({ query }) => {
     .returning("*")
     .modify(selector => {
       if (author) {
-        selector.where('articles.author', '=', author)
+        selector.where("articles.author", "=", author);
       }
-      else if (topic) {
-        selector.where('articles.topic', 'topic')
+      if (topic) {
+        selector.where("articles.topic", "=", topic);
       }
     })
 };
