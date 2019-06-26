@@ -25,7 +25,7 @@ exports.seed = (connection, Promise) => {
           .insert(formattedArticles)
           .returning("*")
           .then(articleRows => {
-            const articleRef = makeRefObj(articleRows);
+            const articleRef = makeRefObj(articleRows, "title", "article_id");
             const formattedComments = formatComments(commentData, articleRef);
             return connection("comments").insert(formattedComments);
           });

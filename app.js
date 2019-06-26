@@ -8,6 +8,10 @@ app.use(express.json());
 
 app.use("/api", apiRouter);
 
-app.use(handleCustomErrors)
+app.all("/*", (req, res, next) => {
+  next({ status: 404, msg: "Page not found"})
+});
+
+app.use(handleCustomErrors);
 
 module.exports = app;
