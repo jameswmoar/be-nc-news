@@ -36,12 +36,17 @@ const addComment = comment => {
     .then(([newComment]) => newComment);
 };
 
-const fetchComments = ({article_id}, sort_by, order) => {
+const fetchComments = (article_id, sort_by, order) => {
   return connection
     .select("*")
     .from("comments")
     .where("article_id", "=", article_id)
-    .orderBy(sort_by || 'created_at', order || 'desc')
+    .orderBy(sort_by || "created_at", order || "desc")
+    .then(comments => {
+      if (comments.length === 0) {
+        return fetchArticle(article_id);
+      } else return comments;
+    });
 };
 
 module.exports = { fetchArticle, updateArticle, addComment, fetchComments };

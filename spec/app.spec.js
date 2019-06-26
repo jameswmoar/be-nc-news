@@ -164,7 +164,7 @@ describe("/", () => {
                 expect(body.newComment.article_id).to.equal(1);
               });
           });
-          it("POST: status 404, returns an error if an invalid article_id is used", () => {
+          it("POST: status 404, returns an error if a non-existent article_id is used", () => {
             return request(app)
               .post("/api/articles/1999/comments")
               .send({
@@ -174,7 +174,20 @@ describe("/", () => {
               })
               .expect(404)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request - invalid article ID");
+                expect(body.msg).to.equal("Article not found");
+              });
+          });
+          it("POST: status 400, returns an error if an invalid article_id is used", () => {
+            return request(app)
+              .post("/api/articles/hello/comments")
+              .send({
+                body:
+                  "I have a controvertial opinion regarding the subject matter of this article",
+                username: "butter_bridge"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - invalid value");
               });
           });
           it("POST: status 400, returns an error if no username is provided", () => {
@@ -186,7 +199,22 @@ describe("/", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request - username and comment text are both required");
+                expect(body.msg).to.equal(
+                  "Bad request - username and comment text are both required"
+                );
+              });
+          });
+          it("POST: status 400, returns an error if no body is provided", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "butter_bridge"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "Bad request - username and comment text are both required"
+                );
               });
           });
 
@@ -203,6 +231,22 @@ describe("/", () => {
                   "body"
                 );
                 expect(body.comments).to.be.descendingBy("created_at");
+              });
+          });
+          it("GET: status 200, returning an empty array if an article containing no comments is entered", () => {
+            return request(app)
+              .get("/api/articles/3/comments")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).to.eql([]);
+              });
+          });
+          it("GET: status 404, returns an error if a non-existent article is entered", () => {
+            return request(app)
+              .get("/api/articles/99/comments")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Article not found");
               });
           });
           it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
