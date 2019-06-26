@@ -233,7 +233,7 @@ describe("/", () => {
                 expect(body.comments).to.be.descendingBy("created_at");
               });
           });
-          it("GET: status 200, returning an empty array if an article containing no comments is entered", () => {
+          it("GET: status 200, returns an empty array if an article containing no comments is entered", () => {
             return request(app)
               .get("/api/articles/3/comments")
               .expect(200)
