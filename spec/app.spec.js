@@ -152,6 +152,14 @@ describe("/", () => {
             expect(body.articles).to.be.descendingBy('author')
           })
       });
+      it('GET: status 200, displays all articles, filtered by a selected topic', () => {
+        return request(app)
+          .get('/api/articles?topic=mitch')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.descendingBy('topic')
+          })
+      });
       it("INVALID METHOD: status 405", () => {
         const invalidMethods = ["patch", "put", "post", "delete"];
         const methodPromises = invalidMethods.map(method => {

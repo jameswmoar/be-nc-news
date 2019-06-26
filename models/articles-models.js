@@ -62,6 +62,9 @@ const fetchArticles = ({ query }) => {
       if (author) {
         selector.where('articles.author', '=', author)
       }
+      else if (topic) {
+        selector.where('articles.topic', 'topic')
+      }
     })
 };
 
