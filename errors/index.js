@@ -5,12 +5,17 @@ const handleCustomErrors = (err, req, res, next) => {
 };
 
 const handleSQLErrors = (err, req, res, next) => {
-  const errorCodes = {
+  const badRequestCodes = {
     "22P02": "Bad request - invalid value",
     "42703": "Bad request - invalid sort by value"
   };
-  if (errorCodes[err.code]) {
-    res.status(400).send({ msg: errorCodes[err.code] });
+  const notFoundCodes = {
+    "23503": "Bad request - invalid article ID"
+  };
+  if (badRequestCodes[err.code]) {
+    res.status(400).send({ msg: badRequestCodes[err.code] });
+  } else if (notFoundCodes[err.code]) {
+    res.status(404).send({ msg: notFoundCodes[err.code] });
   } else next(err);
 };
 

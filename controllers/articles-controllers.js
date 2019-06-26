@@ -33,6 +33,12 @@ const patchArticle = (req, res, next) => {
 const postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
+  if (!username | !body) {
+    return Promise.reject({
+      'status': 400,
+      'msg': 'Bad request - username and comment text are both required'
+    }).catch(next)
+  }
   const newCommentBody = { body };
   newCommentBody.author = username;
   newCommentBody.article_id = article_id;

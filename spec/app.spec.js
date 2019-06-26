@@ -113,31 +113,33 @@ describe("/", () => {
               expect(body.updatedArticle.votes).to.equal(60);
             });
         });
-        it('PATCH: status 400, returns an error where no inc_votes value is provided', () => {
+        it("PATCH: status 200, ignores any additional element passed in through the body", () => {
           return request(app)
-            .patch('/api/articles/1')
-            .expect(400)
-            .then(({body}) => {
-              expect(body.msg).to.equal('Bad request - no increment/decrement value provided')
-            })
+            .patch("/api/articles/1")
+            .send({ inc_votes: -40, pet: "cat" })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedArticle.votes).to.equal(60);
+            });
         });
-        it('PATCH: status 400, returns an error where an invalid inc_votes value is provided', () => {
+        it("PATCH: status 400, returns an error where no inc_votes value is provided", () => {
           return request(app)
-            .patch('/api/articles/1')
-            .send({ inc_votes: 'hello' })
+            .patch("/api/articles/1")
             .expect(400)
-            .then(({body}) => {
-              expect(body.msg).to.equal('Bad request - invalid value')
-            })
+            .then(({ body }) => {
+              expect(body.msg).to.equal(
+                "Bad request - no increment/decrement value provided"
+              );
+            });
         });
-        it.only('PATCH: status 200, ignores any additional element passed in through the body', () => {
+        it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {
           return request(app)
-            .patch('/api/articles/1')
-            .send({ inc_votes: -40, pet: 'cat' })
+            .patch("/api/articles/1")
+            .send({ inc_votes: "hello" })
             .expect(400)
-            .then(({body}) => {
-              expect(body.msg).to.equal('Bad request - too many parameters')
-            })
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Bad request - invalid value");
+            });
         });
 
         describe("/comments", () => {
@@ -162,6 +164,32 @@ describe("/", () => {
                 expect(body.newComment.article_id).to.equal(1);
               });
           });
+          it("POST: status 404, returns an error if an invalid article_id is used", () => {
+            return request(app)
+              .post("/api/articles/1999/comments")
+              .send({
+                body:
+                  "I have a controvertial opinion regarding the subject matter of this article",
+                username: "butter_bridge"
+              })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - invalid article ID");
+              });
+          });
+          it("POST: status 400, returns an error if no username is provided", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                body:
+                  "I have a controvertial opinion regarding the subject matter of this article"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - username and comment text are both required");
+              });
+          });
+
           it("GET: status 200, displays all comments for specified article, sorting comments by created_at and in descending order by default", () => {
             return request(app)
               .get("/api/articles/1/comments")
@@ -206,9 +234,10 @@ describe("/", () => {
               .get("/api/articles/1/comments?sort_by=not-a-column")
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request - invalid sort by value");
+                expect(body.msg).to.equal(
+                  "Bad request - invalid sort by value"
+                );
               });
-              
           });
           it("GET: status 400, displays an error if provided with an invalid order value", () => {
             return request(app)
@@ -217,9 +246,7 @@ describe("/", () => {
               .then(({ body }) => {
                 expect(body.msg).to.equal("Bad request - invalid order value");
               });
-              
           });
-
         });
       });
     });
