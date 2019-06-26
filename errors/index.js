@@ -1,12 +1,32 @@
-
-
 const handleCustomErrors = (err, req, res, next) => {
-  if (err.code === "22P02") {
-    res.status(400).send({ msg: "Bad request" });
+  const errorCodes = { '42703': "Bad request - invalid sort by value" };
+  if (errorCodes[err.code]) {
+    res.status(400).send({ msg: errorCodes[err.code] });
   }
-  if (err.status) {
+  else if (err.status) {
     res.status(err.status).send({ msg: err.msg });
-  }
+  } else next(err)
 };
 
-module.exports = { handleCustomErrors };
+const handleSQLErrors = (err, req, res, next) => {
+  const errorCodes = { "22P02": "Bad request" };
+  if (errorCodes[err.code]) {
+    res.status(400).send({ msg: errorCodes[err.code] });
+  } else next(err)
+};
+
+sendMethodNotAllowed = (req, res) => {
+  res.status(405).send({ msg: "Method not allowed" });
+};
+
+const handleServerError = (err, req, res, next) => {
+  console.log(err);
+  res.status(500).send({ msg: "Internal Server Error" });
+};
+
+module.exports = {
+  handleCustomErrors,
+  handleSQLErrors,
+  sendMethodNotAllowed,
+  handleServerError
+};

@@ -140,16 +140,59 @@ describe("/", () => {
               .get("/api/articles/1/comments")
               .expect(200)
               .then(({ body }) => {
-                expect(body[0]).to.contain.keys(
+                expect(body.comments[0]).to.contain.keys(
                   "comment_id",
                   "votes",
                   "created_at",
                   "author",
                   "body"
                 );
-                expect(body).to.be.descendingBy("created_at");
+                expect(body.comments).to.be.descendingBy("created_at");
               });
           });
+          it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=author")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments[0].author).to.equal("icellusedkars");
+              });
+          });
+          it("GET: status 200, displays all comments for specified article, sorting comments in the specified order when provided with a valid query", () => {
+            return request(app)
+              .get("/api/articles/1/comments?order=asc")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).to.be.ascendingBy("created_at");
+              });
+          });
+          it("GET: status 200, displays all comments for specified article, sorting comments by the specified column and in the specified order when provided with a valid query", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=votes&order=asc")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments).to.be.ascendingBy("votes");
+              });
+          });
+          it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=not-a-column")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - invalid sort by value");
+              });
+              
+          });
+          it("GET: status 400, displays an error if provided with an invalid order value", () => {
+            return request(app)
+              .get("/api/articles/1/comments?order=invalid-order")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - invalid order value");
+              });
+              
+          });
+
         });
       });
     });
