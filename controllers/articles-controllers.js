@@ -1,13 +1,14 @@
 const {
-  fetchArticle,
+  fetchArticleById,
   updateArticle,
   addComment,
-  fetchComments
+  fetchComments,
+  fetchArticles
 } = require("../models/articles-models.js");
 
-const sendArticle = (req, res, next) => {
+const sendArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  fetchArticle(article_id)
+  fetchArticleById(article_id)
     .then(article => {
       res.status(200).send({ article });
     })
@@ -72,4 +73,17 @@ const sendComments = (req, res, next) => {
   }
 };
 
-module.exports = { sendArticle, patchArticle, sendComments, postComment };
+const sendArticles = (req, res, next) => {
+  fetchArticles(req)
+  .then(articles => {
+    res.status(200).send({articles})
+  });
+};
+
+module.exports = {
+  sendArticleById,
+  patchArticle,
+  sendComments,
+  postComment,
+  sendArticles
+};

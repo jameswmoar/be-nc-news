@@ -1,6 +1,6 @@
 const connection = require("../db/connection.js");
 
-const fetchTopics = topics => {
+const fetchTopics = () => {
   return connection
     .select("*")
     .from("topics")

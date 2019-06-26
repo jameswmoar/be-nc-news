@@ -1,6 +1,6 @@
 const connection = require("../db/connection.js");
 
-const fetchArticle = article_id => {
+const fetchArticleById = article_id => {
   return connection
     .first("articles.*")
     .from("articles")
@@ -44,9 +44,31 @@ const fetchComments = (article_id, sort_by, order) => {
     .orderBy(sort_by || "created_at", order || "desc")
     .then(comments => {
       if (comments.length === 0) {
-        return fetchArticle(article_id);
+        return fetchArticleById(article_id);
       } else return comments;
     });
 };
+const fetchArticles = ({ query }) => {
+  const { sort_by, order, author, topic } = query;
+  return connection
+    .select("articles.*")
+    .from("articles")
+    .leftJoin("comments", "articles.article_id", "=", "comments.article_id")
+    .groupBy("articles.article_id")
+    .count({ comment_count: "comments.comment_id" })
+    .orderBy(sort_by || "created_at", order || "desc")
+    .returning("*")
+    .modify(selector => {
+      if (author) {
+        selector.where('articles.author', '=', author)
+      }
+    })
+};
 
-module.exports = { fetchArticle, updateArticle, addComment, fetchComments };
+module.exports = {
+  fetchArticleById,
+  updateArticle,
+  addComment,
+  fetchComments,
+  fetchArticles
+};
