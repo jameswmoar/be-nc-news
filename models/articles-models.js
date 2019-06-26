@@ -29,6 +29,12 @@ const updateArticle = (inc_votes, article_id) => {
     });
 };
 
+const addComment = comment => {
+  return connection
+    .insert(comment)
+    .into("comments")
+    .returning("*")
+    .then(([newComment]) => newComment);
+};
 
-
-module.exports = { fetchArticle, updateArticle };
+module.exports = { fetchArticle, updateArticle, addComment };

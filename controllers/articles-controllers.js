@@ -1,4 +1,4 @@
-const { fetchArticle, updateArticle } = require("../models/articles-models.js");
+const { fetchArticle, updateArticle, addComment } = require("../models/articles-models.js");
 
 const sendArticle = (req, res, next) => {
   const { article_id } = req.params;
@@ -18,6 +18,13 @@ const patchArticle = (req, res, next) => {
 };
 
 const postComment = (req, res, next) => {
+  const { article_id } = req.params
+  const {body} = req
+  body.article_id = article_id
+  addComment(req.body)
+  .then(newComment => {
+    res.status(201).send({newComment})
+  })
 }
 
 module.exports = { sendArticle, patchArticle, postComment };

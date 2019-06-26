@@ -116,11 +116,12 @@ describe("/", () => {
           .post('/api/articles/1/comments')
           .send({
             body: 'I have a controvertial opinion regarding the content of this article',
-            created_by: 'butter_bridge'
+            author: 'butter_bridge'
           })
           .expect(201)
           .then(({body}) => {
-            expect(body.comment).to.contain.keys('body', 'votes', 'comment_id')
+            expect(body.newComment).to.contain.keys('body', 'votes', 'comment_id', 'author', 'created_at', 'article_id')
+            expect(body.newComment.article_id).to.equal(1)
           })
         });
       });
