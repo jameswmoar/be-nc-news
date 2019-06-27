@@ -5,7 +5,6 @@ const commentsRouter = require("./comments-router.js");
 const usersRouter = require("./users-router.js");
 
 apiRouter.route("/")
-// .get(sendEndpoints)
 .all(sendMethodNotAllowed);
 apiRouter.use("/topics", topicsRouter);
 apiRouter.use("/users", usersRouter);

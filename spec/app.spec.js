@@ -496,7 +496,7 @@ describe("/", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedComment.votes).to.equal(17);
+              expect(body.comment.votes).to.equal(17);
             });
         });
         it("PATCH: 200, decrements the vote count by the stated number", () => {
@@ -505,7 +505,7 @@ describe("/", () => {
             .send({ inc_votes: -2 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedComment.votes).to.equal(14);
+              expect(body.comment.votes).to.equal(14);
             });
         });
         it("PATCH: status 200, ignores any additional element passed in through the body", () => {
@@ -514,7 +514,7 @@ describe("/", () => {
             .send({ inc_votes: 1, pet: "cat" })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedComment.votes).to.equal(17);
+              expect(body.comment.votes).to.equal(17);
             });
         });
         it("PATCH: status 400, returns an error where no inc_votes value is provided", () => {
@@ -523,7 +523,7 @@ describe("/", () => {
             .send({})
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedComment.votes).to.equal(16);
+              expect(body.comment.votes).to.equal(16);
             });
         });
         it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {
@@ -533,6 +533,14 @@ describe("/", () => {
             .expect(400)
             .then(({ body }) => {
               expect(body.msg).to.equal("Bad request - invalid value");
+            });
+        });
+        it("PATCH: status 404, returns an error if provided a comment_id that does not exist", () => {
+          return request(app)
+            .patch("/api/comments/99")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Comment with ID 99 not found");
             });
         });
         it("DELETE: status 204", () => {

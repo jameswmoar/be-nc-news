@@ -7,7 +7,15 @@ updateComment = (inc_votes = 0, comment_id) => {
     .where("comment_id", "=", comment_id)
     .increment("votes", inc_votes)
     .returning("*")
-    .then(([article]) => article);
+    .then(([article]) => {
+      if (!article) {
+        return Promise.reject({
+          status:404,
+          msg: `Comment with ID ${comment_id} not found`
+        })
+      }
+     else return article
+    });
 };
 
 removeComment = comment_id => {
