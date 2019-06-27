@@ -24,6 +24,14 @@ describe("/", () => {
   });
 
   describe("/api", () => {
+    it('GET: status 200, returns a JSON of all available endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body}) => {
+          expect(body.endpoints).to.be.an(array)
+        })
+    });
     it("INVALID METHOD: status 405", () => {
       const invalidMethods = ["patch", "put", "post", "delete"];
       const methodPromises = invalidMethods.map(method => {
@@ -166,6 +174,7 @@ describe("/", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.be.descendingBy("topic");
+            expect(body.articles[0].topic).to.equal('mitch')
           });
       });
       it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
@@ -252,7 +261,7 @@ describe("/", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedArticle.votes).to.equal(101);
+              expect(body.article.votes).to.equal(101);
             });
         });
         it("PATCH: status 200, decrements the selected article's vote by the stated number", () => {
@@ -261,7 +270,7 @@ describe("/", () => {
             .send({ inc_votes: -40 })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedArticle.votes).to.equal(60);
+              expect(body.article.votes).to.equal(60);
             });
         });
         it("PATCH: status 200, ignores any additional element passed in through the body", () => {
@@ -270,7 +279,7 @@ describe("/", () => {
             .send({ inc_votes: -40, pet: "cat" })
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedArticle.votes).to.equal(60);
+              expect(body.article.votes).to.equal(60);
             });
         });
         it("PATCH: status 200, returns the article unchanged if no valid body to patch is provided", () => {
@@ -279,7 +288,7 @@ describe("/", () => {
             .send({})
             .expect(200)
             .then(({ body }) => {
-              expect(body.updatedArticle.votes).to.equal(100);
+              expect(body.article.votes).to.equal(100);
             });
         });
         it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {
@@ -315,7 +324,7 @@ describe("/", () => {
               })
               .expect(201)
               .then(({ body }) => {
-                expect(body.newComment).to.contain.keys(
+                expect(body.comment).to.contain.keys(
                   "body",
                   "votes",
                   "comment_id",
@@ -323,7 +332,7 @@ describe("/", () => {
                   "created_at",
                   "article_id"
                 );
-                expect(body.newComment.article_id).to.equal(1);
+                expect(body.comment.article_id).to.equal(1);
               });
           });
           it("POST: status 404, returns an error if a non-existent article_id is used", () => {
@@ -511,11 +520,10 @@ describe("/", () => {
         it("PATCH: status 400, returns an error where no inc_votes value is provided", () => {
           return request(app)
             .patch("/api/comments/1")
-            .expect(400)
+            .send({})
+            .expect(200)
             .then(({ body }) => {
-              expect(body.msg).to.equal(
-                "Bad request - no increment/decrement value provided"
-              );
+              expect(body.updatedComment.votes).to.equal(16);
             });
         });
         it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {

@@ -1,6 +1,6 @@
 const connection = require("../db/connection.js");
 
-updateComment = (inc_votes, comment_id) => {
+updateComment = (inc_votes = 0, comment_id) => {
   return connection
     .first("*")
     .from("comments")

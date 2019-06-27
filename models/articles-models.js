@@ -18,7 +18,7 @@ const fetchArticleById = article_id => {
     });
 };
 
-const updateArticle = (inc_votes, article_id) => {
+const updateArticle = (inc_votes = 0, article_id) => {
   return connection
     .first("*")
     .from("articles")

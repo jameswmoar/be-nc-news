@@ -19,14 +19,11 @@ const sendArticleById = (req, res, next) => {
 };
 
 const patchArticle = (req, res, next) => {
-  let { inc_votes } = req.body;
+  const { inc_votes } = req.body;
   const { article_id } = req.params;
-  if (!inc_votes) {
-    inc_votes = 0;
-  }
   updateArticle(inc_votes, article_id)
-    .then(updatedArticle => {
-      res.status(200).send({ updatedArticle });
+    .then(article => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -44,8 +41,8 @@ const postComment = (req, res, next) => {
     newCommentBody.author = username;
     newCommentBody.article_id = article_id;
     addComment(newCommentBody)
-      .then(newComment => {
-        res.status(201).send({ newComment });
+      .then(comment => {
+        res.status(201).send({ comment });
       })
       .catch(next);
   }
@@ -100,25 +97,6 @@ const sendArticles = (req, res, next) => {
       })
       .catch(next);
   }
-
-  // check the topic exists & check the author exists
-  // if topic is not requested--> model will return nothing
-  // if author is not requested--> model will return nothing
-  // promise deal with both
-
-  // const fetchArticlesPromise = () =>
-  //     fetchArticles(sort_by, order, author, topic)
-  //       .then(articles => {
-  //       res.status(200).send({ articles });
-  //       });
-
-  // if (author) {
-  //   fetchUser(author)
-  //     .then(fetchArticlesPromise)
-  //     .catch(next);
-  // }
-  // else fetchArticlesPromise()
-  //       .catch(next);
 };
 ``;
 

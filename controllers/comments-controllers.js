@@ -3,18 +3,11 @@ const { updateComment } = require("../models/comments-models.js");
 const patchComment = (req, res, next) => {
   const { inc_votes } = req.body;
   const { comment_id } = req.params;
-  if (!inc_votes) {
-    next({
-      status: 400,
-      msg: "Bad request - no increment/decrement value provided"
-    });
-  } else {
     updateComment(inc_votes, comment_id)
-      .then(updatedComment => {
-        res.status(200).send({ updatedComment });
+      .then(comment => {
+        res.status(200).send({ comment });
       })
       .catch(next);
-  }
 };
 
 const deleteComment = (req, res, next) => {
