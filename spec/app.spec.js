@@ -24,12 +24,12 @@ describe("/", () => {
   });
 
   describe("/api", () => {
-    it('GET: status 200, returns a JSON of all available endpoints', () => {
+    it.only('GET: status 200, returns a JSON of all available endpoints', () => {
       return request(app)
         .get('/api')
         .expect(200)
         .then(({body}) => {
-          expect(body.endpoints).to.be.an(array)
+          expect(body).to.be.an('object')
         })
     });
     it("INVALID METHOD: status 405", () => {
