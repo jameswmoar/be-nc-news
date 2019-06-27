@@ -3,10 +3,11 @@ const {
   updateArticle,
   addComment,
   fetchComments,
-  fetchArticles
+  fetchArticles,
+  checkExists
 } = require("../models/articles-models.js");
 const { fetchUser } = require("../models/users-model.js");
-const {fetchTopicByName} = require('../models/topics-models.js')
+const { fetchTopicByName } = require("../models/topics-models.js");
 
 const sendArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -18,20 +19,16 @@ const sendArticleById = (req, res, next) => {
 };
 
 const patchArticle = (req, res, next) => {
-  const { inc_votes } = req.body;
+  let { inc_votes } = req.body;
   const { article_id } = req.params;
   if (!inc_votes) {
-    next({
-      status: 400,
-      msg: "Bad request - no increment/decrement value provided"
-    });
-  } else {
-    updateArticle(inc_votes, article_id)
-      .then(updatedArticle => {
-        res.status(200).send({ updatedArticle });
-      })
-      .catch(next);
+    inc_votes = 0;
   }
+  updateArticle(inc_votes, article_id)
+    .then(updatedArticle => {
+      res.status(200).send({ updatedArticle });
+    })
+    .catch(next);
 };
 
 const postComment = (req, res, next) => {
@@ -83,21 +80,31 @@ const sendArticles = (req, res, next) => {
       status: 400,
       msg: "Bad request - invalid order value"
     });
+  } else {
+    fetchArticles(sort_by, order, author, topic)
+      .then(articles => {
+        const authorExists = author
+          ? checkExists(author, "users", "username")
+          : null;
+        const topicExists = topic ? checkExists(topic, "topics", "slug") : null;
+        return Promise.all([authorExists, topicExists, articles]);
+      })
+      .then(([authorExists, topicExists, articles]) => {
+        if (authorExists === false) {
+          return Promise.reject({ status: 404, msg: "Author not found" });
+        } else if (topicExists === false) {
+          return Promise.reject({ status: 404, msg: "Topic not found" });
+        } else {
+          res.status(200).send({ articles });
+        }
+      })
+      .catch(next);
   }
 
-// check the topic exists & check the author exists
-// if topic is not requested--> model will return nothing 
-// if author is not requested--> model will return nothing 
-// promise deal with both
-
-  fetchArticles(sort_by, order, author, topic)
-        .then(articles => {
-        res.status(200).send({ articles });
-        })
-        .catch(next)
-
-
-
+  // check the topic exists & check the author exists
+  // if topic is not requested--> model will return nothing
+  // if author is not requested--> model will return nothing
+  // promise deal with both
 
   // const fetchArticlesPromise = () =>
   //     fetchArticles(sort_by, order, author, topic)
@@ -112,9 +119,8 @@ const sendArticles = (req, res, next) => {
   // }
   // else fetchArticlesPromise()
   //       .catch(next);
-    
-  
-};``
+};
+``;
 
 module.exports = {
   sendArticleById,

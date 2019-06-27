@@ -57,24 +57,6 @@ describe("/", () => {
         });
         return Promise.all(methodPromises);
       });
-      describe("/:topic", () => {
-        it("GET: status 200, returns the selected topic", () => {
-          return request(app)
-            .get("/api/topics/cats")
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.topic.slug).to.equal("cats");
-            });
-        });
-        it("GET: status 404, returns an error if topic does not exist", () => {
-          return request(app)
-            .get("/api/topics/fake-topic")
-            .expect(404)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Topic not found");
-            });
-        });
-      });
     });
 
     describe("/users", () => {
@@ -202,15 +184,15 @@ describe("/", () => {
             expect(body.msg).to.equal("Bad request - invalid order value");
           });
       });
-      xit("GET: status 404, displays an error if provided with an invalid author", () => {
+      it("GET: status 404, displays an error if provided with an invalid author", () => {
         return request(app)
           .get("/api/articles?author=no-one")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal("User not found");
+            expect(body.msg).to.equal("Author not found");
           });
       });
-      xit("GET: status 404, displays an error if provided with an invalid topic", () => {
+      it("GET: status 404, displays an error if provided with an invalid topic", () => {
         return request(app)
           .get("/api/articles?topic=nothing")
           .expect(404)
@@ -291,14 +273,13 @@ describe("/", () => {
               expect(body.updatedArticle.votes).to.equal(60);
             });
         });
-        it("PATCH: status 400, returns an error where no inc_votes value is provided", () => {
+        it("PATCH: status 200, returns the article unchanged if no valid body to patch is provided", () => {
           return request(app)
             .patch("/api/articles/1")
-            .expect(400)
+            .send({})
+            .expect(200)
             .then(({ body }) => {
-              expect(body.msg).to.equal(
-                "Bad request - no increment/decrement value provided"
-              );
+              expect(body.updatedArticle.votes).to.equal(100);
             });
         });
         it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {

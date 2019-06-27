@@ -7,20 +7,4 @@ const fetchTopics = () => {
     .returning("*");
 };
 
-const fetchTopicByName = topic => {
-  return connection
-    .first("*")
-    .from("topics")
-    .where("slug", "=", topic)
-    .returning("*")
-    .then(topic => {
-      if (!topic) {
-        return Promise.reject({
-          status: 404,
-          msg: "Topic not found"
-        });
-      } else return topic;
-    });
-};
-
-module.exports = { fetchTopics, fetchTopicByName };
+module.exports = { fetchTopics };

@@ -4,6 +4,4 @@ const {sendMethodNotAllowed} = require('../errors/index.js')
 
 topicsRouter.route("/").get(sendTopics).all(sendMethodNotAllowed)
 
-topicsRouter.route('/:topic').get(sendTopicByName)
-
 module.exports = topicsRouter;

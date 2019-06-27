@@ -20,7 +20,7 @@ const patchComment = (req, res, next) => {
 const deleteComment = (req, res, next) => {
   const { comment_id } = req.params;
   removeComment(comment_id).then(message => {
-    res.status(204)
+    res.sendStatus(204)
   }).catch(next)
 };
 

@@ -49,24 +49,33 @@ const fetchComments = (article_id, sort_by, order) => {
     });
 };
 const fetchArticles = (sort_by, order, author, topic) => {
+  return connection
+    .select("articles.*")
+    .from("articles")
+    .leftJoin("comments", "articles.article_id", "=", "comments.article_id")
+    .groupBy("articles.article_id")
+    .count({ comment_count: "comments.comment_id" })
+    .orderBy(sort_by || "created_at", order || "desc")
+    .returning("*")
+    .modify(selector => {
+      if (author) {
+        selector.where("articles.author", "=", author);
+      }
+      if (topic) {
+        selector.where("articles.topic", "=", topic);
+      }
+    });
+};
 
-    return connection
-      .select("articles.*")
-      .from("articles")
-      .leftJoin("comments", "articles.article_id", "=", "comments.article_id")
-      .groupBy("articles.article_id")
-      .count({ comment_count: "comments.comment_id" })
-      .orderBy(sort_by || "created_at", order || "desc")
-      .returning("*")
-      .modify(selector => {
-        if (author) {
-            selector.where("articles.author", "=", author);
-        }
-        if (topic) {
-          selector.where("articles.topic", "=", topic);
-        }
-      })
-  
+const checkExists = (queryValue, table, column) => {
+  return connection
+    .select("*")
+    .from(table)
+    .where(column, queryValue)
+    .then(row => {
+      if (row.length === 0) return false;
+      else return true
+    });
 };
 
 module.exports = {
@@ -74,5 +83,6 @@ module.exports = {
   updateArticle,
   addComment,
   fetchComments,
-  fetchArticles
+  fetchArticles,
+  checkExists
 };
