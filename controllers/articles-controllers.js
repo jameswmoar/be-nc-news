@@ -5,6 +5,8 @@ const {
   fetchComments,
   fetchArticles
 } = require("../models/articles-models.js");
+const { fetchUser } = require("../models/users-model.js");
+const {fetchTopicByName} = require('../models/topics-models.js')
 
 const sendArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -81,14 +83,38 @@ const sendArticles = (req, res, next) => {
       status: 400,
       msg: "Bad request - invalid order value"
     });
-  } else {
-    fetchArticles(sort_by, order, author, topic)
-      .then(articles => {
-        res.status(200).send({ articles });
-      })
-      .catch(next);
   }
-};
+
+// check the topic exists & check the author exists
+// if topic is not requested--> model will return nothing 
+// if author is not requested--> model will return nothing 
+// promise deal with both
+
+  fetchArticles(sort_by, order, author, topic)
+        .then(articles => {
+        res.status(200).send({ articles });
+        })
+        .catch(next)
+
+
+
+
+  // const fetchArticlesPromise = () =>
+  //     fetchArticles(sort_by, order, author, topic)
+  //       .then(articles => {
+  //       res.status(200).send({ articles });
+  //       });
+
+  // if (author) {
+  //   fetchUser(author)
+  //     .then(fetchArticlesPromise)
+  //     .catch(next);
+  // }
+  // else fetchArticlesPromise()
+  //       .catch(next);
+    
+  
+};``
 
 module.exports = {
   sendArticleById,

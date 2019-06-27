@@ -57,6 +57,24 @@ describe("/", () => {
         });
         return Promise.all(methodPromises);
       });
+      describe("/:topic", () => {
+        it("GET: status 200, returns the selected topic", () => {
+          return request(app)
+            .get("/api/topics/cats")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.topic.slug).to.equal("cats");
+            });
+        });
+        it("GET: status 404, returns an error if topic does not exist", () => {
+          return request(app)
+            .get("/api/topics/fake-topic")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Topic not found");
+            });
+        });
+      });
     });
 
     describe("/users", () => {
@@ -117,65 +135,63 @@ describe("/", () => {
           .then(({ body }) => {
             expect(body.articles).to.be.an("array");
             expect(body.articles[0]).to.contain.keys(
-              'article_id',
-              'title',
-              'comment_count',
-              'votes',
-              'topic',
-              'author',
-              'created_at'
-            )
-            expect(body.articles).to.be.descendingBy('created_at')
+              "article_id",
+              "title",
+              "comment_count",
+              "votes",
+              "topic",
+              "author",
+              "created_at"
+            );
+            expect(body.articles).to.be.descendingBy("created_at");
           });
       });
-      it('GET: status 200, displays all articles, sorted appropriately when provided a sort_by query', () => {
+      it("GET: status 200, displays all articles, sorted appropriately when provided a sort_by query", () => {
         return request(app)
-          .get('/api/articles?sort_by=title')
+          .get("/api/articles?sort_by=title")
           .expect(200)
-          .then(({body}) => {
-            expect(body.articles).to.be.descendingBy('title')
-          })
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("title");
+          });
       });
-      it('GET: status 200, displays all articles, sorted in ascending order when provided that query', () => {
+      it("GET: status 200, displays all articles, sorted in ascending order when provided that query", () => {
         return request(app)
-          .get('/api/articles?order=asc')
+          .get("/api/articles?order=asc")
           .expect(200)
-          .then(({body}) => {
-            expect(body.articles).to.be.ascendingBy('created_at')
-          })
+          .then(({ body }) => {
+            expect(body.articles).to.be.ascendingBy("created_at");
+          });
       });
-      it('GET: status 200, displays all articles, filtered by a selected author', () => {
+      it("GET: status 200, displays all articles, filtered by a selected author", () => {
         return request(app)
-          .get('/api/articles?author=butter_bridge')
+          .get("/api/articles?author=butter_bridge")
           .expect(200)
-          .then(({body}) => {
-            expect(body.articles).to.be.descendingBy('author')
-          })
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("author");
+          });
       });
-      it('GET: status 200, displays all articles, filtered by a selected topic', () => {
+      it("GET: status 200, displays all articles, filtered by a selected topic", () => {
         return request(app)
-          .get('/api/articles?topic=mitch')
+          .get("/api/articles?topic=mitch")
           .expect(200)
-          .then(({body}) => {
-            expect(body.articles).to.be.descendingBy('topic')
-          })
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("topic");
+          });
       });
-      it('GET: status 200, displays all articles, filtered by a selected author and topic', () => {
+      it("GET: status 200, displays all articles, filtered by a selected author and topic", () => {
         return request(app)
-          .get('/api/articles?author=rogersop&topic=mitch')
+          .get("/api/articles?author=rogersop&topic=mitch")
           .expect(200)
-          .then(({body}) => {
-            expect(body.articles).to.be.descendingBy('topic')
-          })
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("topic");
+          });
       });
       it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
         return request(app)
           .get("/api/articles?sort_by=not-a-column")
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.equal(
-              "Bad request - invalid sort by value"
-            );
+            expect(body.msg).to.equal("Bad request - invalid sort by value");
           });
       });
       it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
@@ -183,12 +199,25 @@ describe("/", () => {
           .get("/api/articles?order=invalid-order")
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.equal(
-              "Bad request - invalid order value"
-            );
+            expect(body.msg).to.equal("Bad request - invalid order value");
           });
       });
-
+      xit("GET: status 404, displays an error if provided with an invalid author", () => {
+        return request(app)
+          .get("/api/articles?author=no-one")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("User not found");
+          });
+      });
+      xit("GET: status 404, displays an error if provided with an invalid topic", () => {
+        return request(app)
+          .get("/api/articles?topic=nothing")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Topic not found");
+          });
+      });
       it("INVALID METHOD: status 405", () => {
         const invalidMethods = ["patch", "put", "post", "delete"];
         const methodPromises = invalidMethods.map(method => {
@@ -469,6 +498,79 @@ describe("/", () => {
             });
         });
         return Promise.all(methodPromises);
+      });
+      describe("/:comment_id", () => {
+        it("PATCH: 200, increments the vote count by the stated number", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: 1 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedComment.votes).to.equal(17);
+            });
+        });
+        it("PATCH: 200, decrements the vote count by the stated number", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: -2 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedComment.votes).to.equal(14);
+            });
+        });
+        it("PATCH: status 200, ignores any additional element passed in through the body", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: 1, pet: "cat" })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.updatedComment.votes).to.equal(17);
+            });
+        });
+        it("PATCH: status 400, returns an error where no inc_votes value is provided", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal(
+                "Bad request - no increment/decrement value provided"
+              );
+            });
+        });
+        it("PATCH: status 400, returns an error where an invalid inc_votes value is provided", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: "hello" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Bad request - invalid value");
+            });
+        });
+        it("DELETE: status 204", () => {
+          return request(app)
+            .delete("/api/comments/1")
+            .expect(204);
+        });
+        it("DELETE: status 404, returns an error message if provided a comment_id that does not exist", () => {
+          return request(app)
+            .delete("/api/comments/99")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Comment with ID 99 not found");
+            });
+        });
+        it("INVALID METHOD: status 405", () => {
+          const invalidMethods = ["get", "post", "put"];
+          const methodPromises = invalidMethods.map(method => {
+            return request(app)
+              [method]("/api/comments/1")
+              .expect(405)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Method not allowed");
+              });
+          });
+          return Promise.all(methodPromises);
+        });
       });
     });
   });
