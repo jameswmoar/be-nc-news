@@ -136,6 +136,36 @@ describe("/", () => {
             expect(body.articles).to.be.descendingBy("created_at");
           });
       });
+      it("GET: status 200, displays all articles, sorting them by date and in descending order by default, limiting the total number to the specified limit", () => {
+        return request(app)
+          .get("/api/articles?limit=5")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.an("array");
+            expect(body.articles.length).to.equal(5)
+            expect(body.articles).to.be.descendingBy("created_at");
+          });
+      });
+      it("GET: status 200, displays all articles, sorting them by date and in descending order by default, limiting the total number to 10 by default", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.an("array");
+            expect(body.articles.length).to.equal(10)
+            expect(body.articles).to.be.descendingBy("created_at");
+          });
+      });
+      it("GET: status 200, displays all articles from a specific page, calculated by using the default or specified limit", () => {
+        return request(app)
+          .get("/api/articles?p=2")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.an("array");
+            expect(body.articles[0].title).to.equal('Am I a cat?')
+            expect(body.articles).to.be.descendingBy("created_at");
+          });
+      });
       it("GET: status 200, displays all articles, sorted appropriately when provided a sort_by query", () => {
         return request(app)
           .get("/api/articles?sort_by=title")
@@ -207,6 +237,47 @@ describe("/", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body.msg).to.equal("Topic not found");
+          });
+      });
+      it("GET: status 400, an error if provided with an invalid limit", () => {
+        return request(app)
+          .get("/api/articles?limit=infinity")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('Bad request - query must be an integer')
+          });
+      });
+      it("GET: status 400, an error if provided with an invalid page", () => {
+        return request(app)
+          .get("/api/articles?p=invalid")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('Bad request - query must be an integer')
+          });
+      });
+      it("GET: status 404, an error if provided with a page that does not exist", () => {
+        return request(app)
+          .get("/api/articles?p=4")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('Page not found - insufficient articles')
+          });
+      });
+      it("GET: status 404, an error if provided with a page that does not exist, taking account of the particular limit", () => {
+        return request(app)
+          .get("/api/articles?limit=12&p=2")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('Page not found - insufficient articles')
+          });
+      });
+      it("GET: status 200, has a total_count property, which displays the total number of articles", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            
+            expect(body.total_count).to.equal(12);
           });
       });
       it("INVALID METHOD: status 405", () => {
@@ -451,6 +522,30 @@ describe("/", () => {
               .expect(200)
               .then(({ body }) => {
                 expect(body.comments).to.be.ascendingBy("votes");
+              });
+          });
+          it("GET: status 200, displays all comments, limited to 10 by default", () => {
+            return request(app)
+              .get("/api/articles/1/comments")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments.length).to.equal(10)
+              });
+          });
+          it("GET: status 200, displays all comments, limited to the specified limit query", () => {
+            return request(app)
+              .get("/api/articles/1/comments?limit=5")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments.length).to.equal(5)
+              });
+          });
+          it("GET: status 200, displays the relevant page of comments", () => {
+            return request(app)
+              .get("/api/articles/1/comments?p=2")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments[0].author).to.equal('icellusedkars')
               });
           });
           it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {

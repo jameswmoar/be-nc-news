@@ -36,19 +36,23 @@ const addComment = comment => {
     .then(([newComment]) => newComment);
 };
 
-const fetchComments = (article_id, sort_by, order) => {
+const fetchComments = (article_id, sort_by, order, limit = 10, p = 1) => {
+  const offset = (p - 1) * limit;
   return connection
     .select("*")
     .from("comments")
     .where("article_id", "=", article_id)
     .orderBy(sort_by || "created_at", order || "desc")
+    .limit(limit)
+    .offset(offset)
     .then(comments => {
       if (comments.length === 0) {
         return fetchArticleById(article_id);
       } else return comments;
     });
 };
-const fetchArticles = (sort_by, order, author, topic) => {
+const fetchArticles = (sort_by, order, author, topic, limit = 10, p = 1) => {
+  const offset = (p - 1) * limit;
   return connection
     .select("articles.*")
     .from("articles")
@@ -56,6 +60,8 @@ const fetchArticles = (sort_by, order, author, topic) => {
     .groupBy("articles.article_id")
     .count({ comment_count: "comments.comment_id" })
     .orderBy(sort_by || "created_at", order || "desc")
+    .limit(limit)
+    .offset(offset)
     .returning("*")
     .modify(selector => {
       if (author) {
@@ -74,8 +80,33 @@ const checkExists = (queryValue, table, column) => {
     .where(column, queryValue)
     .then(row => {
       if (row.length === 0) return false;
-      else return true
+      else return true;
     });
+};
+
+const countArticles = (author, topic) => {
+  return connection
+    .select("*")
+    .from("articles")
+    .modify(selector => {
+      if (author) {
+        selector.where("articles.author", "=", author);
+      }
+      if (topic) {
+        selector.where("articles.topic", "=", topic);
+      }
+    })
+    .then(articles => articles.length);
+};
+
+const checkIfInteger = (queryValue, next) => {
+  const isInteger = /\d+/;
+  if (isInteger.test(queryValue) === false)
+    return next({
+      status: 400,
+      msg: "Bad request - query must be an integer"
+    });
+  else return true;
 };
 
 module.exports = {
@@ -84,5 +115,7 @@ module.exports = {
   addComment,
   fetchComments,
   fetchArticles,
-  checkExists
+  checkExists,
+  checkIfInteger,
+  countArticles
 };
