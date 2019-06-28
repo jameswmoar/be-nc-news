@@ -115,5 +115,15 @@
     "DELETE /api/comments/:comment_id": {
       "description": "returns a status of 204 with no body"
     }
+  },
+  "/api/users/:username": {
+    "GET /api/users/:username": {
+      "description": "serves an object containing details of the requested user",
+      "exampleResponse": {
+        "username": "grumpy19",
+        "avatar_url": "https://www.tumbit.com/profile-image/4/original/mr-grumpy.jpg",
+        "name": "Paul Grump"
+      }
+    }
   }
 }

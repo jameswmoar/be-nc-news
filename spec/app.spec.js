@@ -421,6 +421,14 @@ describe("/", () => {
                 expect(body.msg).to.equal("Article not found");
               });
           });
+          it("GET: status 400, returns an error if an invalid article is entered", () => {
+            return request(app)
+              .get("/api/articles/invalid/comments")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Bad request - invalid value");
+              });
+          });
           it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
             return request(app)
               .get("/api/articles/1/comments?sort_by=author")
@@ -556,6 +564,14 @@ describe("/", () => {
             .expect(404)
             .then(({ body }) => {
               expect(body.msg).to.equal("Comment with ID 99 not found");
+            });
+        });
+        it("DELETE: status 400, returns an error message if provided a comment_id that does not exist", () => {
+          return request(app)
+            .delete("/api/comments/invalid")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Bad request - invalid value");
             });
         });
         it("INVALID METHOD: status 405", () => {
