@@ -10,12 +10,12 @@ const handleSQLErrors = (err, req, res, next) => {
     "42703": "Bad request - invalid sort by value"
   };
   const notFoundCodes = {
-    "23503": "Article not found"
+    "23503": "Not found"
   };
   if (badRequestCodes[err.code]) {
     res.status(400).send({ msg: badRequestCodes[err.code] });
   } else if (notFoundCodes[err.code]) {
-    res.status(404).send({ msg: notFoundCodes[err.code] });
+    res.status(404).send({ msg: `${notFoundCodes[err.code]} - ${err.detail}` });
   } else next(err);
 };
 

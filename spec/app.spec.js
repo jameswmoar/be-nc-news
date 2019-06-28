@@ -24,13 +24,13 @@ describe("/", () => {
   });
 
   describe("/api", () => {
-    it.only('GET: status 200, returns a JSON of all available endpoints', () => {
+    it("GET: status 200, returns a JSON of all available endpoints", () => {
       return request(app)
-        .get('/api')
+        .get("/api")
         .expect(200)
-        .then(({body}) => {
-          expect(body).to.be.an('object')
-        })
+        .then(({ body }) => {
+          expect(body).to.be.an("object");
+        });
     });
     it("INVALID METHOD: status 405", () => {
       const invalidMethods = ["patch", "put", "post", "delete"];
@@ -174,7 +174,7 @@ describe("/", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.be.descendingBy("topic");
-            expect(body.articles[0].topic).to.equal('mitch')
+            expect(body.articles[0].topic).to.equal("mitch");
           });
       });
       it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
@@ -345,7 +345,9 @@ describe("/", () => {
               })
               .expect(404)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Article not found");
+                expect(body.msg).to.equal(
+                  'Not found - Key (article_id)=(1999) is not present in table "articles".'
+                );
               });
           });
           it("POST: status 400, returns an error if an invalid article_id is used", () => {
