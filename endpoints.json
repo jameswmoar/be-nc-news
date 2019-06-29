@@ -16,14 +16,15 @@
   "/api/articles": {
     "GET /api/articles": {
       "description": "serves an array of all articles",
-      "queries": ["author", "topic", "sort_by", "order"],
+      "queries": ["author", "topic", "sort_by", "order", "limit", "p"],
       "exampleResponse": {
         "articles": [
           {
             "title": "Article 1"
           },
           { "title": "Article 2" }
-        ]
+        ],
+        "total_count": 20
       }
     }
   },
@@ -45,6 +46,7 @@
     },
     "PATCH /api/articles/:article_id": {
       "description": "serves an object containing the updated article",
+      "queries": ["sort_by", "order", "limit", "p"],
       "exampleBody": {
         "inc_votes": 2
       },

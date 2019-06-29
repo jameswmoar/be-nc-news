@@ -99,6 +99,14 @@ const countArticles = (author, topic) => {
     .then(articles => articles.length);
 };
 
+const countComments = article_id => {
+  return connection
+    .select("*")
+    .from("comments")
+    .where("article_id", "=", article_id)
+    .then(comments => comments.length);
+};
+
 const checkIfInteger = (queryValue, next) => {
   const isInteger = /\d+/;
   if (isInteger.test(queryValue) === false)
@@ -117,5 +125,6 @@ module.exports = {
   fetchArticles,
   checkExists,
   checkIfInteger,
-  countArticles
+  countArticles,
+  countComments
 };

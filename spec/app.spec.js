@@ -142,7 +142,7 @@ describe("/", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.be.an("array");
-            expect(body.articles.length).to.equal(5)
+            expect(body.articles.length).to.equal(5);
             expect(body.articles).to.be.descendingBy("created_at");
           });
       });
@@ -152,7 +152,7 @@ describe("/", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.be.an("array");
-            expect(body.articles.length).to.equal(10)
+            expect(body.articles.length).to.equal(10);
             expect(body.articles).to.be.descendingBy("created_at");
           });
       });
@@ -162,7 +162,7 @@ describe("/", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.be.an("array");
-            expect(body.articles[0].title).to.equal('Am I a cat?')
+            expect(body.articles[0].title).to.equal("Am I a cat?");
             expect(body.articles).to.be.descendingBy("created_at");
           });
       });
@@ -244,7 +244,7 @@ describe("/", () => {
           .get("/api/articles?limit=infinity")
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.equal('Bad request - query must be an integer')
+            expect(body.msg).to.equal("Bad request - query must be an integer");
           });
       });
       it("GET: status 400, an error if provided with an invalid page", () => {
@@ -252,7 +252,7 @@ describe("/", () => {
           .get("/api/articles?p=invalid")
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.equal('Bad request - query must be an integer')
+            expect(body.msg).to.equal("Bad request - query must be an integer");
           });
       });
       it("GET: status 404, an error if provided with a page that does not exist", () => {
@@ -260,7 +260,7 @@ describe("/", () => {
           .get("/api/articles?p=4")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal('Page not found - insufficient articles')
+            expect(body.msg).to.equal("Page not found - insufficient articles");
           });
       });
       it("GET: status 404, an error if provided with a page that does not exist, taking account of the particular limit", () => {
@@ -268,7 +268,7 @@ describe("/", () => {
           .get("/api/articles?limit=12&p=2")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal('Page not found - insufficient articles')
+            expect(body.msg).to.equal("Page not found - insufficient articles");
           });
       });
       it("GET: status 200, has a total_count property, which displays the total number of articles", () => {
@@ -276,7 +276,6 @@ describe("/", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body }) => {
-            
             expect(body.total_count).to.equal(12);
           });
       });
@@ -497,7 +496,7 @@ describe("/", () => {
               .get("/api/articles/invalid/comments")
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request - invalid value");
+                expect(body.msg).to.equal("Bad request - Article ID must be an integer");
               });
           });
           it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
@@ -529,7 +528,7 @@ describe("/", () => {
               .get("/api/articles/1/comments")
               .expect(200)
               .then(({ body }) => {
-                expect(body.comments.length).to.equal(10)
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET: status 200, displays all comments, limited to the specified limit query", () => {
@@ -537,7 +536,7 @@ describe("/", () => {
               .get("/api/articles/1/comments?limit=5")
               .expect(200)
               .then(({ body }) => {
-                expect(body.comments.length).to.equal(5)
+                expect(body.comments.length).to.equal(5);
               });
           });
           it("GET: status 200, displays the relevant page of comments", () => {
@@ -545,9 +544,59 @@ describe("/", () => {
               .get("/api/articles/1/comments?p=2")
               .expect(200)
               .then(({ body }) => {
-                expect(body.comments[0].author).to.equal('icellusedkars')
+                expect(body.comments[0].author).to.equal("icellusedkars");
               });
           });
+          it("GET: status 200, displays the relevant page of comments, taking the limit into account", () => {
+            return request(app)
+              .get("/api/articles/1/comments?limit=5&p=3")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments[0].author).to.equal("icellusedkars");
+              });
+          });
+
+          it("GET: status 400, an error if provided with an invalid limit", () => {
+            return request(app)
+              .get("/api/articles/1/comments?limit=infinity")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "Bad request - query must be an integer"
+                );
+              });
+          });
+          it("GET: status 400, an error if provided with an invalid page", () => {
+            return request(app)
+              .get("/api/articles/1/comments?p=invalid")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "Bad request - query must be an integer"
+                );
+              });
+          });
+          it("GET: status 404, an error if provided with a page that does not exist", () => {
+            return request(app)
+              .get("/api/articles/1/comments?p=4")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "Page not found - insufficient articles"
+                );
+              });
+          });
+          it("GET: status 404, an error if provided with a page that does not exist, taking account of the particular limit", () => {
+            return request(app)
+              .get("/api/articles/1/comments?limit=13&p=2")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "Page not found - insufficient articles"
+                );
+              });
+          });
+
           it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
             return request(app)
               .get("/api/articles/1/comments?sort_by=not-a-column")

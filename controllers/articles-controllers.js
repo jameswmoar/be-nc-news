@@ -6,7 +6,8 @@ const {
   fetchArticles,
   checkExists,
   checkIfInteger,
-  countArticles
+  countArticles,
+  countComments
 } = require("../models/articles-models.js");
 const { fetchUser } = require("../models/users-model.js");
 const { fetchTopicByName } = require("../models/topics-models.js");
@@ -52,23 +53,45 @@ const postComment = (req, res, next) => {
 
 const sendComments = (req, res, next) => {
   const { article_id } = req.params;
-  const { sort_by, order, limit, p } = req.query;
+  const { sort_by, order, limit = 10, p } = req.query;
   const validOrder = ["asc", "desc"].includes(order);
+  const isInteger = /\d+/;
+  if (isInteger.test(article_id) === false) {
+    return next({
+      status: 400,
+      msg: "Bad request - Article ID must be an integer"
+    });
+  }
+  if (limit && isInteger.test(limit) === false) {
+    return checkIfInteger(limit, next);
+  }
+  if (p && isInteger.test(p) === false) {
+    return checkIfInteger(p, next);
+  }
   if (order && !validOrder) {
-    next({
+    return next({
       status: 400,
       msg: "Bad request - invalid order value"
     });
-  } else {
-    fetchComments(article_id, sort_by, order, limit, p)
-      .then(comments => {
-        if (comments.hasOwnProperty("body")) {
-          comments = [];
-          res.status(200).send({ comments });
-        } else res.status(200).send({ comments });
-      })
-      .catch(next);
   }
+  countComments(article_id).then(commentCount => {
+    const maxPages = Math.ceil(commentCount / limit);
+    if (p > maxPages) {
+      return next({
+        status: 404,
+        msg: "Page not found - insufficient articles"
+      });
+    } else {
+      fetchComments(article_id, sort_by, order, limit, p)
+        .then(comments => {
+          if (comments.hasOwnProperty("body")) {
+            comments = [];
+            res.status(200).send({ comments });
+          } else res.status(200).send({ comments });
+        })
+        .catch(next);
+    }
+  });
 };
 
 const sendArticles = (req, res, next) => {
@@ -104,12 +127,7 @@ const sendArticles = (req, res, next) => {
           const topicExists = topic
             ? checkExists(topic, "topics", "slug")
             : null;
-          return Promise.all([
-            totalCount,
-            authorExists,
-            topicExists,
-            articles
-          ]);
+          return Promise.all([totalCount, authorExists, topicExists, articles]);
         })
         .then(([totalCount, authorExists, topicExists, articles]) => {
           if (authorExists === false) {
