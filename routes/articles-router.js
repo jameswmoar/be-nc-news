@@ -4,16 +4,19 @@ const {
   patchArticle,
   sendComments,
   postComment,
-  sendArticles
+  sendArticles,
+  postArticle,
+  deleteArticle
 } = require("../controllers/articles-controllers.js");
 const { sendMethodNotAllowed } = require("../errors/index.js");
 
-articlesRouter.route("/").get(sendArticles).all(sendMethodNotAllowed);
+articlesRouter.route("/").get(sendArticles).post(postArticle).all(sendMethodNotAllowed);
 
 articlesRouter
   .route("/:article_id")
   .get(sendArticleById)
   .patch(patchArticle)
+  .delete(deleteArticle)
   .all(sendMethodNotAllowed);
   
 articlesRouter

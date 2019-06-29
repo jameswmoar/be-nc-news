@@ -7,7 +7,10 @@ const {
   checkExists,
   checkIfInteger,
   countArticles,
-  countComments
+  countComments,
+  addArticle,
+  removeArticle,
+  removeCommentsByArticle
 } = require("../models/articles-models.js");
 const { fetchUser } = require("../models/users-model.js");
 const { fetchTopicByName } = require("../models/topics-models.js");
@@ -143,10 +146,36 @@ const sendArticles = (req, res, next) => {
   });
 };
 
+const postArticle = (req, res, next) => {
+  const { body } = req;
+  addArticle(body, next)
+    .then(article => {
+      res.status(201).send({ article });
+    })
+    .catch(next);
+};
+
+const deleteArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const isInteger = /\d+/;
+  if (isInteger.test(article_id) === false) {
+    return checkIfInteger(article_id, next);
+  }
+  removeCommentsByArticle(article_id).then(deleted => {
+    removeArticle(article_id)
+      .then(message => {
+        res.sendStatus(204);
+      })
+      .catch(next);
+  });
+};
+
 module.exports = {
   sendArticleById,
   patchArticle,
   sendComments,
   postComment,
-  sendArticles
+  sendArticles,
+  postArticle,
+  deleteArticle
 };

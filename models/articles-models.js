@@ -1,4 +1,5 @@
 const connection = require("../db/connection.js");
+const removeComment = require("./comments-models.js");
 
 const fetchArticleById = article_id => {
   return connection
@@ -117,6 +118,40 @@ const checkIfInteger = (queryValue, next) => {
   else return true;
 };
 
+const addArticle = article => {
+  return connection
+    .insert(article)
+    .into("articles")
+    .returning("*")
+    .then(([article]) => article);
+};
+
+const removeArticle = article_id => {
+  return connection
+    .first("articles.*")
+    .from("articles")
+    .where("articles.article_id", "=", article_id)
+    .del()
+    .then(deleted => {
+      if (!deleted) {
+        return Promise.reject({
+          status: 404,
+          msg: `Article with ID ${article_id} not found`
+        });
+      } else {
+        return "Article deleted";
+      }
+    });
+};
+
+const removeCommentsByArticle = article_id => {
+  return connection
+    .select("*")
+    .from("comments")
+    .where("article_id", "=", article_id)
+    .del()
+};
+
 module.exports = {
   fetchArticleById,
   updateArticle,
@@ -126,5 +161,8 @@ module.exports = {
   checkExists,
   checkIfInteger,
   countArticles,
-  countComments
+  countComments,
+  addArticle,
+  removeArticle,
+  removeCommentsByArticle
 };

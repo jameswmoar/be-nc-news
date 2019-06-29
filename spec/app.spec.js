@@ -215,7 +215,7 @@ describe("/", () => {
             expect(body.msg).to.equal("Bad request - invalid sort by value");
           });
       });
-      it("GET: status 400, displays an error if provided with an invalid sort_by value", () => {
+      it("GET: status 400, displays an error if provided with an invalid order value", () => {
         return request(app)
           .get("/api/articles?order=invalid-order")
           .expect(400)
@@ -279,8 +279,76 @@ describe("/", () => {
             expect(body.total_count).to.equal(12);
           });
       });
+      it("POST: status 201, posts a new article, displaying that article", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            title: "A Critical Analysis of Cat Food Manufacturing",
+            topic: "cats",
+            author: "rogersop",
+            body:
+              "After many months of gruelling investigations, it emerges that the famous cat food, 'Catlent Green' is in fact comprised of cats."
+          })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.article).to.include({
+              title: "A Critical Analysis of Cat Food Manufacturing",
+              topic: "cats",
+              author: "rogersop",
+              body:
+                "After many months of gruelling investigations, it emerges that the famous cat food, 'Catlent Green' is in fact comprised of cats.",
+              votes: 0
+            });
+            expect(body.article).to.contain.keys("created_at", "article_id");
+          });
+      });
+      it("POST: status 404, returns an error if a non-existent author is used", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            title: "A Critical Analysis of Cat Food Manufacturing",
+            topic: "cats",
+            author: "mitt",
+            body:
+              "After many months of gruelling investigations, it emerges that the famous cat food, 'Catlent Green' is in fact comprised of cats."
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              'Not found - Key (author)=(mitt) is not present in table "users".'
+            );
+          });
+      });
+      it("POST: status 404, returns an error if a non-existent topic is used", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            title: "A Critical Analysis of Cat Food Manufacturing",
+            topic: "dogs",
+            author: "rogersopp",
+            body:
+              "After many months of gruelling investigations, it emerges that the famous cat food, 'Catlent Green' is in fact comprised of cats."
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              'Not found - Key (topic)=(dogs) is not present in table "topics".'
+            );
+          });
+      });
+      it("POST: status 400, returns an error if insufficient details are provided within the body", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.contain(
+              "Bad request - insufficient details provided to create article"
+            );
+          });
+      });
       it("INVALID METHOD: status 405", () => {
-        const invalidMethods = ["patch", "put", "post", "delete"];
+        const invalidMethods = ["patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
             [method]("/api/articles")
@@ -370,8 +438,29 @@ describe("/", () => {
               expect(body.msg).to.equal("Bad request - invalid value");
             });
         });
+        it('DELETE: status 204', () => {
+          return request(app)
+            .delete('/api/articles/1')
+            .expect(204)
+        });
+        it('DELETE: status 404, returns an error where an article that does not exist is provided', () => {
+          return request(app)
+            .delete('/api/articles/99')
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Article with ID 99 not found')
+            })
+        });
+        it.only('DELETE: status 400, returns an error where an invalid article_id is provided', () => {
+          return request(app)
+            .delete('/api/articles/invalid')
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Bad request - query must be an integer')
+            })
+        });
         it("INVALID METHOD: status 405", () => {
-          const invalidMethods = ["put", "post", "delete"];
+          const invalidMethods = ["put", "post"];
           const methodPromises = invalidMethods.map(method => {
             return request(app)
               [method]("/api/articles/1")
@@ -496,7 +585,9 @@ describe("/", () => {
               .get("/api/articles/invalid/comments")
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Bad request - Article ID must be an integer");
+                expect(body.msg).to.equal(
+                  "Bad request - Article ID must be an integer"
+                );
               });
           });
           it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
