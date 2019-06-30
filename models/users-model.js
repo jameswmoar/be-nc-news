@@ -15,4 +15,12 @@ const fetchUser = username => {
     })
 };
 
-module.exports = { fetchUser };
+const addUser = user => {
+  return connection
+    .insert(user)
+    .into('users')
+    .returning('*')
+    .then(([user]) => user)
+}
+
+module.exports = { fetchUser, addUser };

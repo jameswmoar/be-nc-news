@@ -1,6 +1,6 @@
-const { fetchUser } = require("../models/users-model.js");
+const { fetchUser, addUser } = require("../models/users-model.js");
 
-const sendUser = (req, res, next) => {
+const sendUserByName = (req, res, next) => {
   const { username } = req.params;
   fetchUser(username)
     .then(user => {
@@ -9,4 +9,21 @@ const sendUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports = { sendUser };
+const postUser = (req, res, next) => {
+  const { body } = req;
+  const validUsername = /.{3}/;
+  if (validUsername.test(body.username) === false) {
+    return next({
+      status: 400,
+      msg: "Bad request - Username must be at least 3 characters in length"
+    });
+  } else {
+    addUser(body)
+      .then(user => {
+        res.status(201).send({ user });
+      })
+      .catch(next);
+  }
+};
+
+module.exports = { sendUserByName, postUser };
