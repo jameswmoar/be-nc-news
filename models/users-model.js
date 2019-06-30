@@ -23,4 +23,11 @@ const addUser = user => {
     .then(([user]) => user)
 }
 
-module.exports = { fetchUser, addUser };
+const fetchUsers = () => {
+  return connection
+    .select('*')
+    .from('users')
+    .returning('*')
+}
+
+module.exports = { fetchUser, addUser, fetchUsers };

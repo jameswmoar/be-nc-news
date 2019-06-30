@@ -160,6 +160,19 @@ describe("/", () => {
     });
 
     describe("/users", () => {
+      it("GET: status 200, displays all registered users", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.users).to.be.an("array");
+            expect(body.users[0]).to.contain.keys(
+              "username",
+              "name",
+              "avatar_url"
+            );
+          });
+      });
       it("POST: status 201, displays the details of the new user", () => {
         return request(app)
           .post("/api/users")
@@ -180,7 +193,9 @@ describe("/", () => {
           .send({})
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.contain("Bad request - insufficient details provided to post");
+            expect(body.msg).to.contain(
+              "Bad request - insufficient details provided to post"
+            );
           });
       });
       it("POST: status 400, returns an error if provided a username that is too short", () => {
@@ -194,11 +209,13 @@ describe("/", () => {
           })
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.contain("Bad request - Username must be at least 3 characters in length");
+            expect(body.msg).to.contain(
+              "Bad request - Username must be at least 3 characters in length"
+            );
           });
       });
       it("INVALID METHOD: status 405", () => {
-        const invalidMethods = ["get", "patch", "put", "delete"];
+        const invalidMethods = ["patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
             [method]("/api/users")
