@@ -7,4 +7,12 @@ const fetchTopics = () => {
     .returning("*");
 };
 
-module.exports = { fetchTopics };
+const addComment = body => {
+  return connection
+    .insert(body)
+    .into('topics')
+    .returning("*")
+    .then(([topic]) => topic)
+}
+
+module.exports = { fetchTopics, addComment };

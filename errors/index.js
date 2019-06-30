@@ -9,7 +9,8 @@ const handleSQLErrors = (err, req, res, next) => {
   const badRequestCodes = {
     "22P02": "Bad request - invalid value",
     "42703": "Bad request - invalid sort by value",
-    "23502": "Bad request - insufficient details provided to create article"
+    "23502": "Bad request - insufficient details provided to post",
+    "23505": "Bad request"
   };
   const notFoundCodes = {
     "23503": "Not found",

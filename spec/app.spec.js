@@ -53,8 +53,100 @@ describe("/", () => {
             expect(body.topics).to.be.an("array");
           });
       });
+      it("POST: status 201, returns the posted topic", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "dogs",
+            description: "Man's best friend"
+          })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.topic).to.contain.keys("slug", "description");
+            expect(body.topic.slug).to.equal("dogs");
+          });
+      });
+      it("POST: status 400, returns an error if the slug already exists", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "cats",
+            description: "Any description"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - Key (slug)=(cats) already exists."
+            );
+          });
+      });
+      it("POST: status 400, returns an error if no description is provided", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "dogs"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - insufficient details provided to post - Failing row contains (dogs, null)."
+            );
+          });
+      });
+      it("POST: status 400, returns an error if no slug is provided", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            description: "Any description"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.contain(
+              "Bad request - insufficient details provided to post"
+            );
+          });
+      });
+      it("POST: status 400, returns an error if no details are provided", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.contain(
+              "Bad request - insufficient details provided to post"
+            );
+          });
+      });
+      it.only("POST: status 400, returns an error if the description is less than 3 characters in length", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "hi",
+            description: "A valid description"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - Slug must be at least 3 characters in length"
+            );
+          });
+      });
+      it.only("POST: status 400, returns an error if the slug is less than 3 characters in length", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "pirates",
+            description: "No"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - description must be at least 3 characters in length"
+            );
+          });
+      });
       it("INVALID METHOD: status 405", () => {
-        const invalidMethods = ["patch", "put", "post", "delete"];
+        const invalidMethods = ["patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
           return request(app)
             [method]("/api/topics")
@@ -343,7 +435,7 @@ describe("/", () => {
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).to.contain(
-              "Bad request - insufficient details provided to create article"
+              "Bad request - insufficient details provided to post"
             );
           });
       });
@@ -438,26 +530,28 @@ describe("/", () => {
               expect(body.msg).to.equal("Bad request - invalid value");
             });
         });
-        it('DELETE: status 204', () => {
+        it("DELETE: status 204", () => {
           return request(app)
-            .delete('/api/articles/1')
-            .expect(204)
+            .delete("/api/articles/1")
+            .expect(204);
         });
-        it('DELETE: status 404, returns an error where an article that does not exist is provided', () => {
+        it("DELETE: status 404, returns an error where an article that does not exist is provided", () => {
           return request(app)
-            .delete('/api/articles/99')
+            .delete("/api/articles/99")
             .expect(404)
-            .then(({body}) => {
-              expect(body.msg).to.equal('Article with ID 99 not found')
-            })
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Article with ID 99 not found");
+            });
         });
-        it.only('DELETE: status 400, returns an error where an invalid article_id is provided', () => {
+        it("DELETE: status 400, returns an error where an invalid article_id is provided", () => {
           return request(app)
-            .delete('/api/articles/invalid')
+            .delete("/api/articles/invalid")
             .expect(400)
-            .then(({body}) => {
-              expect(body.msg).to.equal('Bad request - query must be an integer')
-            })
+            .then(({ body }) => {
+              expect(body.msg).to.equal(
+                "Bad request - query must be an integer"
+              );
+            });
         });
         it("INVALID METHOD: status 405", () => {
           const invalidMethods = ["put", "post"];
