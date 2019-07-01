@@ -214,6 +214,22 @@ describe("/", () => {
             );
           });
       });
+      it("POST: status 400, returns an error if provided username already exists", () => {
+        return request(app)
+          .post("/api/users")
+          .send({
+            username: "butter_bridge",
+            avatar_url:
+              "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+            name: "Grumpy"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.contain(
+              "Bad request - Key (username)=(butter_bridge) already exists."
+            );
+          });
+      });
       it("INVALID METHOD: status 405", () => {
         const invalidMethods = ["patch", "put", "delete"];
         const methodPromises = invalidMethods.map(method => {
