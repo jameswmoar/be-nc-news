@@ -120,29 +120,26 @@ const sendArticles = (req, res, next) => {
         status: 404,
         msg: "Page not found - insufficient articles"
       });
-    } else {
-      fetchArticles(sort_by, order, author, topic, limit, p)
-        .then(articles => {
-          const totalCount = countArticles(author, topic);
-          const authorExists = author
-            ? checkExists(author, "users", "username")
-            : null;
-          const topicExists = topic
-            ? checkExists(topic, "topics", "slug")
-            : null;
-          return Promise.all([totalCount, authorExists, topicExists, articles]);
-        })
-        .then(([totalCount, authorExists, topicExists, articles]) => {
-          if (authorExists === false) {
-            return Promise.reject({ status: 404, msg: "Author not found" });
-          } else if (topicExists === false) {
-            return Promise.reject({ status: 404, msg: "Topic not found" });
-          } else {
-            res.status(200).send({ articles, total_count: totalCount });
-          }
-        })
-        .catch(next);
     }
+    fetchArticles(sort_by, order, author, topic, limit, p)
+      .then(articles => {
+        const totalCount = countArticles(author, topic);
+        const authorExists = author
+          ? checkExists(author, "users", "username")
+          : null;
+        const topicExists = topic ? checkExists(topic, "topics", "slug") : null;
+        return Promise.all([totalCount, authorExists, topicExists, articles]);
+      })
+      .then(([totalCount, authorExists, topicExists, articles]) => {
+        if (authorExists === false) {
+          return Promise.reject({ status: 404, msg: "Author not found" });
+        } else if (topicExists === false) {
+          return Promise.reject({ status: 404, msg: "Topic not found" });
+        } else {
+          res.status(200).send({ articles, total_count: totalCount });
+        }
+      })
+      .catch(next);
   });
 };
 
