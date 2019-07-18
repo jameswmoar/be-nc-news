@@ -754,7 +754,7 @@ describe("/", () => {
                 );
               });
           });
-          it("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
+          it.only("GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query", () => {
             return request(app)
               .get("/api/articles/1/comments?sort_by=author")
               .expect(200)

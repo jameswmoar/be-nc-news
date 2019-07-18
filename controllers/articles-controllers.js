@@ -90,7 +90,7 @@ const sendComments = (req, res, next) => {
           if (comments.hasOwnProperty("body")) {
             comments = [];
             res.status(200).send({ comments });
-          } else res.status(200).send({ comments });
+          } else res.status(200).send({ comments, total_count: commentCount });
         })
         .catch(next);
     }
