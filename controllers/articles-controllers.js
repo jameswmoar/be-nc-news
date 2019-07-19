@@ -79,21 +79,22 @@ const sendComments = (req, res, next) => {
   }
   countComments(article_id).then(commentCount => {
     const maxPages = Math.ceil(commentCount / limit);
-    if (p > maxPages) {
+    if (maxPages === 0) {
+      maxPages === 1;
+    } else if (p > maxPages) {
       return next({
         status: 404,
         msg: "Page not found - insufficient articles"
       });
-    } else {
-      fetchComments(article_id, sort_by, order, limit, p)
-        .then(comments => {
-          if (comments.hasOwnProperty("body")) {
-            comments = [];
-            res.status(200).send({ comments });
-          } else res.status(200).send({ comments, total_count: commentCount });
-        })
-        .catch(next);
     }
+    fetchComments(article_id, sort_by, order, limit, p)
+      .then(comments => {
+        if (comments.hasOwnProperty("body")) {
+          comments = [];
+          res.status(200).send({ comments });
+        } else res.status(200).send({ comments, total_count: commentCount });
+      })
+      .catch(next);
   });
 };
 
