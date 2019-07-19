@@ -115,7 +115,10 @@ const sendArticles = (req, res, next) => {
     });
   }
   countArticles(author, topic).then(articleCount => {
-    const maxPages = Math.ceil(articleCount / limit);
+    let maxPages = Math.ceil(articleCount / limit);
+    if (maxPages === 0) {
+      maxPages = 1
+    }
     if (p > maxPages) {
       return next({
         status: 404,
