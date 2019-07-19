@@ -9,7 +9,14 @@ const sendTopics = (req, res, next) => {
 const postTopic = (req, res, next) => {
   const { body } = req;
   const validBody = /.{3}/;
-  if (validBody.test(body.slug) === false) {
+  const whitespaceCheck = /\s+/
+  if (whitespaceCheck.test(body.slug) === true) {
+    return next({
+      status: 400,
+      msg: "Bad request - Slug must not contain whitespace"
+    })
+  }
+  else if (validBody.test(body.slug) === false) {
     return next({
       status: 400,
       msg: "Bad request - Slug must be at least 3 characters in length"

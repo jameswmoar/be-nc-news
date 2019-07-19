@@ -117,7 +117,7 @@ describe("/", () => {
             );
           });
       });
-      it("POST: status 400, returns an error if the description is less than 3 characters in length", () => {
+      it("POST: status 400, returns an error if the slug is less than 3 characters in length", () => {
         return request(app)
           .post("/api/topics")
           .send({
@@ -131,7 +131,7 @@ describe("/", () => {
             );
           });
       });
-      it("POST: status 400, returns an error if the slug is less than 3 characters in length", () => {
+      it("POST: status 400, returns an error if the decription is less than 3 characters in length", () => {
         return request(app)
           .post("/api/topics")
           .send({
@@ -142,6 +142,20 @@ describe("/", () => {
           .then(({ body }) => {
             expect(body.msg).to.equal(
               "Bad request - description must be at least 3 characters in length"
+            );
+          });
+      });
+      it("POST: status 400, returns an error if the slug is not one single word (i.e. no whitespace)", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "pirate singers",
+            description: "pirate singers"
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              "Bad request - Slug must not contain whitespace"
             );
           });
       });
